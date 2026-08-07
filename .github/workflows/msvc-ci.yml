@@ -4,28 +4,28 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  workflow_dispatch:   # <--- Tambahkan baris ini saja
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Configure and Build
-        run: |
-          mkdir build
-          cd build
-          cmake -G "Visual Studio 17 2022" -A Win32 ..
-          cmake --build . --config Debug
-          cmake --build . --config Release
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Test
-        run: |
-          cmake --build build --config Debug --target check
-          cmake --build build --config Release --target check
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-      - name: Upload artifact
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: pycdc-release
-          path: build\Release\*.exe
+          path: build/Release/pycdc.exe
